@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>Правда или ложь</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Правда или ложь">
+    <meta name="theme-color" content="#7f6f6f">
+    <script src="https://yandex.ru/games/sdk/v2"></script>
+    <!-- Yandex.Metrika counter -->
+    <script type="text/javascript" >
+        (function(m,e,t,r,i,k,a){m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+            m[i].l=1*new Date();k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)})
+        (window, document, "script", "https://mc.yandex.ru/metrika/tag.js", "ym");
+
+        ym(55355212, "init", {
+            clickmap:true,
+            trackLinks:true,
+            accurateTrackBounce:true,
+            webvisor:true
+        });
+    </script>
+    <noscript><div><img src="https://mc.yandex.ru/watch/55355212" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- /Yandex.Metrika counter -->
+    <link rel="shortcut icon" href="images/favicon.png" type="image/x-icon">
+    <link rel="stylesheet" type="text/css" href="reset.min.css">
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <!--<script src="https://yandex.ru/games/sdk/v2"></script>-->
+</head>
+<body translate="no">
+<div class="start"></div>
+<div class="game" :class="[levels ? 'levels' : '']" >
+    <div class="property">
+    <h1 class="name" v-show="menu">Правда или ложь</h1>
+    <div class="blackout" v-show="blackout"></div>
+    <div class="levels" v-show="levels">
+        <h2 class="levelHead">Уровни <span class="amountOfStars">{{stars.reduce((acc, e) => acc +
+            e, 0)}}/{{stars.length * 3}}<img
+            src="images/star.svg" width="40px" height="40px"></span></h2>
+        <div class="level" v-for="i in numOfLevels" @click="startLevel(i-1)">{{i}}
+            <div class="stars">
+                <div class="star" :class="[stars[i-1] > 0 ? '' : 'noStar']"></div>
+                <div class="star" :class="[stars[i-1] > 1 ? '' : 'noStar']"></div>
+                <div class="star" :class="[stars[i-1] > 2 ? '' : 'noStar']"></div>
+            </div>
+            <div class="lock" v-show="(!(i === 1)) && stars[i-2]===0"></div>
+        </div>
+        <a class="trueOrFalse2 level"
+           href="https://app-98042.games.s3.yandex.net/98042/spgx02wzuf2ut50bjghrwz5hk19nx34f/index.html"
+           v-show="stars[20]>=1">
+            Правда или ложь 2
+            <div class="stars">
+                <div class="star noStar"></div>
+                <div class="star noStar"></div>
+                <div class="star noStar" ></div>
+            </div>
+            </a>
+    </div>
+    <div class="content" v-show="content">
+        <div class="topMenu">
+            <div class="numOfQuestion">{{numOfQuestions+1}}/10</div>
+            <div class="hearts">
+                <div class="heart" :class="[hearts > 0 ? '' : 'noHeart']"></div>
+                <div class="heart" :class="[hearts > 1 ? '' : 'noHeart']"></div>
+                <div class="heart" :class="[hearts > 2 ? '' : 'noHeart']"></div>
+            </div>
+            <div class="lvl">Уровень {{levelNum+1}}</div>
+        </div>
+        <div class="timer">{{timer}}</div>
+        <div class="question">
+            {{question}}
+        </div>
+        <div class="bottomMenu">
+            <div class="buttons">
+                <div class="yes" @click="giveAnswer(true)" v-show="!isAnswerGiven && !endGame">Правда</div>
+                <div class="next" v-if="isAnswerGiven && !endGame" @click="getQuestion()"></div>
+                <div class="no" @click="giveAnswer(false)" v-show="!isAnswerGiven && !endGame">Ложь</div>
+                <button class="returnMenu" @click="returnMenu" v-show="endGame">Вернуться к уровням</button>
+            </div>
+        </div>
+        <div class="questionResult" v-if="isAnswerGiven && result === 1">Верно
+            <img src="images/true.svg" alt="" width="64px" height="64px"></div>
+        <div class="questionResult lie" v-if="isAnswerGiven && result === 0">Неверно
+            <img src="images/false.svg" alt=""  width="64px" height="64px"></div>
+        <div class="questionResult lie" v-if="isAnswerGiven && result === 2">Время вышло
+            <img src="images/timeout.png" alt=""></div>
+        <div class="result" v-if="endGame">
+            <div class="innerResult">
+                <p class="givenAnswers">Правильных ответов:{{this.rightAnswers}}/10</p>
+                <div class="stars">
+                    <div class="star" :class="[givenStars > 0 ? '' : 'noStar']"></div>
+                    <div class="star" :class="[givenStars > 1 ? '' : 'noStar']"></div>
+                    <div class="star" :class="[givenStars > 2 ? '' : 'noStar']"></div>
+                </div>
+                <p v-if="gameResult === 0">К сожалению, вы не набрали минимального количества верных ответов</p>
+                <p v-if="gameResult === 1">Переходите к следующему уровню!</p>
+                <p v-else>Попробуйте снова!</p>
+            </div>
+        </div>
+    </div>
+    </div>
+</div>
+<script src="vue.min.js"></script>
+<script src="index.js"></script>
+<script src="sw.js" type="text/javascript"></script>
+<script>
+    if('serviceWorker' in navigator){
+        navigator.serviceWorker
+            .register('sw.js')
+            .then(function(reg) {
+                console.log('Registration succeeded. Scope is ' + reg.scope);
+            })
+            .catch(function(error) {
+                console.error('Trouble with sw: ', error);
+            });
+    }
+</script>
+</body>
+</html>
